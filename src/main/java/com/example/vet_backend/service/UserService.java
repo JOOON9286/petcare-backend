@@ -1,8 +1,8 @@
 package com.example.vet_backend.service;
 
 
-import com.example.vet_backend.dto.Login;
-import com.example.vet_backend.dto.Signup;
+import com.example.vet_backend.dto.auth.Login;
+import com.example.vet_backend.dto.auth.Signup;
 import com.example.vet_backend.entity.User;
 import com.example.vet_backend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;

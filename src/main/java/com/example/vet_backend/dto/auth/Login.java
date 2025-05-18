@@ -1,4 +1,4 @@
-package com.example.vet_backend.dto;
+package com.example.vet_backend.dto.auth;
 
 import lombok.*;
 
@@ -7,10 +7,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Signup {
+public class Login {
 
     private String email;
     private String password;
-    private String name;
-    private String phone;
 }
