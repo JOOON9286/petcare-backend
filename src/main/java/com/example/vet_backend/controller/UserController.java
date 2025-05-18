@@ -1,14 +1,11 @@
 package com.example.vet_backend.controller;
-import com.example.vet_backend.dto.Signup;
-import com.example.vet_backend.entity.User;
+import com.example.vet_backend.dto.auth.Signup;
 import com.example.vet_backend.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RequestMapping("/api/users")
 @RestController
