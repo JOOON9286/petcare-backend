@@ -1,4 +1,4 @@
-package com.example.vet_backend.dto;
+package com.example.vet_backend.dto.auth;
 
 import lombok.*;
 
