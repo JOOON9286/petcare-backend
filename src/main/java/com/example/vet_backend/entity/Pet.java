@@ -1,12 +1,17 @@
 package com.example.vet_backend.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "pet")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Pet {
 
     @Id
