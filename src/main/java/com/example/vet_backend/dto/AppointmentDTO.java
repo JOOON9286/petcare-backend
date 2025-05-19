@@ -17,7 +17,12 @@ public class AppointmentDTO {
     private String statusCall;
     private LocalDateTime scheduledTime;
     private LocalDateTime createdAt;
+
     private Long userId;
     private Long vetId;
     private Long petId;
+
+    private String symptoms;
+    private String medicalHistory;
+    private String additionalInfo;
 }
