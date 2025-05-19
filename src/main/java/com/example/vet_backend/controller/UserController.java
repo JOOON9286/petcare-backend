@@ -1,5 +1,7 @@
 package com.example.vet_backend.controller;
+
 import com.example.vet_backend.dto.auth.Signup;
+import com.example.vet_backend.entity.User;
 import com.example.vet_backend.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,26 @@ public class UserController {
             // 서버 문제
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "회원가입 중 오류 발생: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getMyInfo() {
+        try {
+            User currentUser = userService.getCurrentUser();
+
+            // 필요한 정보만 보내기 (DTO로 변환 추천)
+            Map<String, Object> response = Map.of(
+                    "userId", currentUser.getUserId(),
+                    "email", currentUser.getEmail(),
+                    "name", currentUser.getName(),
+                    "role", currentUser.getRole()
+            );
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "사용자 인증 실패: " + e.getMessage()));
         }
     }
 
