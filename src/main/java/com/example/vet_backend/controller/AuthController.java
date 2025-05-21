@@ -55,7 +55,7 @@ public class AuthController {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
-        String accessToken = jwtTokenProvider.createToken(user.getEmail(), "ROLE_USER");
+        String accessToken = jwtTokenProvider.createToken(user.getEmail(), user.getRole()); // 역할 전달
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getEmail());
 
         user.setRefreshToken(refreshToken);
@@ -65,10 +65,12 @@ public class AuthController {
         response.put("accessToken", accessToken);
         response.put("refreshToken", refreshToken);
         response.put("email", user.getEmail());
-        response.put("name", user.getName());   //사용자 이름도 추가 클라이언트에서 보여주기 위해
+        response.put("name", user.getName());
+        response.put("role", user.getRole());
 
         return ResponseEntity.ok(response);
     }
+
     // 토큰 갱신 (리프레시 토큰)
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refresh(@RequestBody Map<String, String> request) {

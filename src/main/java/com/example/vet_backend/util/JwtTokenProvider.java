@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +24,6 @@ public class JwtTokenProvider {
 
     private final long tokenValidTime = 1000L * 60 * 60; // 1시간
 
-    // secretKey를 Base64로 인코딩
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
@@ -41,7 +41,7 @@ public class JwtTokenProvider {
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
-    // 리프레시 토큰 생성
+
     public String createRefreshToken(String userId) {
         Date now = new Date();
         long refreshTokenValidTime = 1000L * 60 * 60 * 24 * 7; // 7일
@@ -54,15 +54,21 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-
-    // 인증 정보 추출
+    //  인증 객체 생성 시 role을 포함
     public Authentication getAuthentication(String token) {
-        String userId = getUserId(token);
-        User userDetails = new User(userId, "", List.of()); // 권한은 비워둬도 무방
+        Claims claims = Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
+
+        String userId = claims.getSubject();
+        String role = (String) claims.get("role");
+        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+
+        User userDetails = new User(userId, "", authorities);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    // userId 추출
     public String getUserId(String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey)
@@ -71,7 +77,6 @@ public class JwtTokenProvider {
                 .getSubject();
     }
 
-    // 토큰 유효성 검사
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
@@ -81,7 +86,6 @@ public class JwtTokenProvider {
         }
     }
 
-    // HTTP 요청 헤더에서 토큰 추출
     public String resolveToken(HttpServletRequest request) {
         String bearer = request.getHeader("Authorization");
         if (bearer != null && bearer.startsWith("Bearer ")) {
