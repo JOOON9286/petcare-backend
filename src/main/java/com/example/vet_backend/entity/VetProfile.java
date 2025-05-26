@@ -14,8 +14,8 @@ public class VetProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long vetId;
+
     private String name;
     private String specialty;
     private String licenseNumber;
@@ -24,8 +24,9 @@ public class VetProfile {
     private Integer reviewCount;
     private Boolean isOnline;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    //user : vet -> 1대1관계
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
     @ManyToOne
