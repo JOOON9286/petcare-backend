@@ -11,7 +11,6 @@ import lombok.*;
 public class VetProfileDTO {
 
     private Long vetId;
-    private String name;
     private String specialty;
     private String licenseNumber;
     private String profilePhoto;
@@ -20,5 +19,7 @@ public class VetProfileDTO {
     private Boolean isOnline;
     private Long userId;
     private Long hospitalId;
-
+    private String userName;       // 수의사 이름
+    private String hospitalName;   // 병원 이름
 }
+
