@@ -47,7 +47,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/doctor/**",
                                 "/api/appointment/**",
-                                "/api/doctor/mypage/**"
+                                "/api/doctor/mypage/**",
+                                "/api/vets/me"
                         ).hasRole("DOCTOR")
 
                         // 관리자 전용
