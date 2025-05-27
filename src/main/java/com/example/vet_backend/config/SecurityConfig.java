@@ -23,20 +23,39 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)  //csrf 람다 변경
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // JWT는 세션 사용 안 함
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // 공개 경로
                         .requestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/login",
                                 "/api/users/register",
-                                "/api/users/login"
+                                "/api/users/login",
+                                "/api/community/**"
                         ).permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // ROLE_ADMIN만 접근
-                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN") // 둘 다 가능
-                        .anyRequest().authenticated()
 
+                        // 사용자 전용 경로
+                        .requestMatchers(
+                                "/api/reservation/**",
+                                "/api/mypage/**",
+                                "/api/pet/**"
+                        ).hasRole("USER")
+
+                        // 의사 전용 경로
+                        .requestMatchers(
+                                "/api/doctor/**",
+                                "/api/appointment/**",
+                                "/api/doctor/mypage/**",
+                                "/api/vets/me"
+                        ).hasRole("DOCTOR")
+
+                        // 관리자 전용
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // 나머지는 인증 필요
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 

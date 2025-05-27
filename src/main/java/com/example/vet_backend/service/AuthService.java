@@ -1,7 +1,6 @@
 package com.example.vet_backend.service;
 
-import com.example.vet_backend.dto.Login;
-import com.example.vet_backend.dto.Signup;
+import com.example.vet_backend.dto.auth.Login;
 import com.example.vet_backend.entity.User;
 import com.example.vet_backend.repository.UserRepository;
 import com.example.vet_backend.util.JwtTokenProvider;
@@ -26,6 +25,7 @@ public class AuthService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        return jwtTokenProvider.createToken(user.getEmail(), user.getRole());
+        // userId는 user.getId() (long) 이고, String으로 변환해서 넣음
+        return jwtTokenProvider.createToken(String.valueOf(user.getUserId()), user.getRole(),user.getEmail());
     }
 }

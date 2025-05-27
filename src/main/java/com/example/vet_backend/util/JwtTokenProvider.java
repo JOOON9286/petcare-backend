@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
@@ -23,16 +24,17 @@ public class JwtTokenProvider {
 
     private final long tokenValidTime = 1000L * 60 * 60; // 1시간
 
-    // secretKey를 Base64로 인코딩
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    // 토큰 생성
-    public String createToken(String userId, String role) {
+    // 토큰 생성 (userId, role, email 포함)
+    public String createToken(String userId, String role, String email) {
         Claims claims = Jwts.claims().setSubject(userId);
         claims.put("role", role);
+        claims.put("email", email);
+        claims.put("userId", userId);
         Date now = new Date();
         return Jwts.builder()
                 .setClaims(claims)
@@ -41,7 +43,8 @@ public class JwtTokenProvider {
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
-    // 리프레시 토큰 생성
+
+    // 리프레시 토큰 생성 (userId만 포함)
     public String createRefreshToken(String userId) {
         Date now = new Date();
         long refreshTokenValidTime = 1000L * 60 * 60 * 24 * 7; // 7일
@@ -54,21 +57,36 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-
-    // 인증 정보 추출
+    // 토큰에서 인증 정보 추출 (role 포함)
     public Authentication getAuthentication(String token) {
-        String userId = getUserId(token);
-        User userDetails = new User(userId, "", List.of()); // 권한은 비워둬도 무방
+        Claims claims = Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
+
+        String userId = claims.getSubject();
+        String role = (String) claims.get("role");
+        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+
+        User userDetails = new User(userId, "", authorities);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    // userId 추출
+    // 토큰에서 userId 추출
     public String getUserId(String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public String getEmail(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody()
+                .get("email", String.class);
     }
 
     // 토큰 유효성 검사
@@ -81,7 +99,7 @@ public class JwtTokenProvider {
         }
     }
 
-    // HTTP 요청 헤더에서 토큰 추출
+    // HTTP 요청 헤더에서 토큰 추출 (Bearer 토큰)
     public String resolveToken(HttpServletRequest request) {
         String bearer = request.getHeader("Authorization");
         if (bearer != null && bearer.startsWith("Bearer ")) {
