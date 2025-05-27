@@ -29,10 +29,12 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    // 토큰 생성
-    public String createToken(String userId, String role) {
+    // 토큰 생성 (userId, role, email 포함)
+    public String createToken(String userId, String role, String email) {
         Claims claims = Jwts.claims().setSubject(userId);
         claims.put("role", role);
+        claims.put("email", email);
+        claims.put("userId", userId);
         Date now = new Date();
         return Jwts.builder()
                 .setClaims(claims)
@@ -42,6 +44,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    // 리프레시 토큰 생성 (userId만 포함)
     public String createRefreshToken(String userId) {
         Date now = new Date();
         long refreshTokenValidTime = 1000L * 60 * 60 * 24 * 7; // 7일
@@ -54,7 +57,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    //  인증 객체 생성 시 role을 포함
+    // 토큰에서 인증 정보 추출 (role 포함)
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(secretKey)
@@ -69,6 +72,7 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
+    // 토큰에서 userId 추출
     public String getUserId(String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey)
@@ -77,6 +81,15 @@ public class JwtTokenProvider {
                 .getSubject();
     }
 
+    public String getEmail(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody()
+                .get("email", String.class);
+    }
+
+    // 토큰 유효성 검사
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
@@ -86,6 +99,7 @@ public class JwtTokenProvider {
         }
     }
 
+    // HTTP 요청 헤더에서 토큰 추출 (Bearer 토큰)
     public String resolveToken(HttpServletRequest request) {
         String bearer = request.getHeader("Authorization");
         if (bearer != null && bearer.startsWith("Bearer ")) {
