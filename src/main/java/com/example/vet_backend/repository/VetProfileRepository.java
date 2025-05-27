@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface VetProfileRepository extends JpaRepository<VetProfile, Long> {
 
-    Optional<VetProfile> findByUser_UserId(Long userId);
-
+    Optional<VetProfile> findByUserEmail(String email);
+    Optional<VetProfile> findByUserUserId(Long userId);
 
 }

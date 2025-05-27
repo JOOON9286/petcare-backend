@@ -14,9 +14,9 @@ public class VetProfileService {
         this.vetProfileRepository = vetProfileRepository;
     }
 
-    public VetProfileDTO getVetProfileById(Long vetId) {
-        VetProfile vetProfile = vetProfileRepository.findById(vetId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 수의사를 찾을 수 없습니다."));
+    public VetProfileDTO getVetProfileByEmail(String email) {
+        VetProfile vetProfile = vetProfileRepository.findByUserEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 수의사를 찾을 수 없습니다."));
 
         return VetProfileDTO.builder()
                 .vetId(vetProfile.getVetId())
@@ -27,9 +27,10 @@ public class VetProfileService {
                 .reviewCount(vetProfile.getReviewCount())
                 .isOnline(vetProfile.getIsOnline())
                 .userId(vetProfile.getUser().getUserId())
-                .hospitalId(vetProfile.getHospital() != null ? vetProfile.getHospital().getHospitalId() : null)
                 .userName(vetProfile.getUser().getName())
+                .hospitalId(vetProfile.getHospital() != null ? vetProfile.getHospital().getHospitalId() : null)
                 .hospitalName(vetProfile.getHospital() != null ? vetProfile.getHospital().getName() : null)
                 .build();
     }
+
 }
