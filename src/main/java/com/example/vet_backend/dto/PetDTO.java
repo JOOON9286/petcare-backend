@@ -22,5 +22,6 @@ public class PetDTO {
     private String medicalHistory;
     private LocalDateTime createdAt;
     private Long userId;
-    //반려동물 DTO
+    private boolean neutered;
+
 }

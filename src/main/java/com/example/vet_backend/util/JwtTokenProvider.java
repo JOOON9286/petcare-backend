@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
@@ -29,10 +30,10 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    // 토큰 생성
+    // ✅ 토큰 생성 (권한을 리스트로 넣어야 Spring Security가 인식)
     public String createToken(String userId, String role) {
         Claims claims = Jwts.claims().setSubject(userId);
-        claims.put("role", role);
+        claims.put("authorities", List.of(role)); // ✅ 핵심: role → authorities로!
         Date now = new Date();
         return Jwts.builder()
                 .setClaims(claims)
@@ -45,7 +46,6 @@ public class JwtTokenProvider {
     public String createRefreshToken(String userId) {
         Date now = new Date();
         long refreshTokenValidTime = 1000L * 60 * 60 * 24 * 7; // 7일
-
         return Jwts.builder()
                 .setSubject(userId)
                 .setIssuedAt(now)
@@ -54,7 +54,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    //  인증 객체 생성 시 role을 포함
+    // ✅ 인증 객체 생성 (authorities 꺼내서 매핑)
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts.parser()
                 .setSigningKey(secretKey)
@@ -62,11 +62,15 @@ public class JwtTokenProvider {
                 .getBody();
 
         String userId = claims.getSubject();
-        String role = (String) claims.get("role");
-        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+
+        @SuppressWarnings("unchecked")
+        List<String> roles = (List<String>) claims.get("authorities"); // ✅ key는 authorities
+        List<SimpleGrantedAuthority> authorities = roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
 
         User userDetails = new User(userId, "", authorities);
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
     }
 
     public String getUserId(String token) {

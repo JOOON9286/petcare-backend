@@ -38,4 +38,8 @@ public class Pet {
     @ManyToOne
     @JoinColumn(name = "user_id")   //사용자 ID
     private User owner;
+
+    @Column(nullable = false)
+    private boolean neutered = false;
+
 }
