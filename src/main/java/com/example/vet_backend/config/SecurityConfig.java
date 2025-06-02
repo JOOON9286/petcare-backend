@@ -40,7 +40,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/reservation/**",
                                 "/api/mypage/**",
-                                "/api/pet/**"
+                                "/api/pet/**",
+                                "/api/vets"
                         ).hasRole("USER")
 
                         // 의사 전용 경로
