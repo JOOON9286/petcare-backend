@@ -1,27 +1,24 @@
 package com.example.vet_backend.service;
-
-
-import com.example.vet_backend.dto.auth.Login;
+import com.example.vet_backend.dto.UserDTO;
 import com.example.vet_backend.dto.auth.Signup;
 import com.example.vet_backend.entity.User;
 import com.example.vet_backend.repository.UserRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import com.example.vet_backend.util.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    private final JwtTokenProvider jwtTokenProvider;
+    
+    //생성자 주입
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     public void register(Signup request) {
@@ -29,45 +26,63 @@ public class UserService {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
 
-        User user = new User();
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setName(request.getName());
-        user.setPhone(request.getPhone());
+        User user = User.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .name(request.getName())
+                .phone(request.getPhone())
+                .role("ROLE_USER")
+                .build();
 
         userRepository.save(user);
     }
 
-    public User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("인증되지 않은 사용자입니다.");
+    public UserDTO getUserDTOFromToken(HttpServletRequest request) {
+        String token = jwtTokenProvider.resolveToken(request);
+        if (token == null) {
+            throw new IllegalArgumentException("토큰이 없습니다.");
+        }
+        String email = jwtTokenProvider.getEmail(token);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        return entityToDTO(user);
+    }
+
+    public UserDTO updateUserInfoAndReturnDTO(HttpServletRequest request, UserDTO dto) {
+        String token = jwtTokenProvider.resolveToken(request);
+        if (token == null) {
+            throw new IllegalArgumentException("토큰이 없습니다.");
+        }
+        String currentEmail = jwtTokenProvider.getEmail(token);
+
+        User user = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        if (!dto.getEmail().equals(currentEmail)) {
+            if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+                throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            }
+            user.setEmail(dto.getEmail());
         }
 
-        String email = authentication.getName(); // JWT 인증 시 이메일이 이름으로 들어오는 경우
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+        user.setPhone(dto.getPhone());
+
+        User updatedUser = userRepository.save(user);
+        return entityToDTO(updatedUser);
     }
 
-    public boolean login(Login request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-
-        return passwordEncoder.matches(request.getPassword(), user.getPassword());
-    }
-    public User saveUser(User user) {
-        return userRepository.save(user);
-    }
-
-    public List<User> getAllUsers(){
-        return userRepository.findAll();
-    }
-
-    public Optional<User> getUserById(Long id){
-        return userRepository.findById(id);
-    }
-
-    public void deleteUser(Long id){
-        userRepository.deleteById(id);
+    private UserDTO entityToDTO(User user) {
+        return UserDTO.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .name(user.getName())  // UserDTO에 name x 이름수정 못함
+                .phone(user.getPhone())
+                .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .build();
     }
 }
+

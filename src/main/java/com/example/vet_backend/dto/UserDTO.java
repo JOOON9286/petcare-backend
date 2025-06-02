@@ -3,7 +3,6 @@ package com.example.vet_backend.dto;
 
 import lombok.*;
 
-import javax.management.relation.Role;
 import java.time.LocalDateTime;
 
 @Getter
@@ -13,9 +12,11 @@ import java.time.LocalDateTime;
 @Builder
 public class UserDTO {
     private Long userId;
+    private String name;
     private String email;
     private String password;
-    private Role role;
+    private String phone;
+    private String role;
     private LocalDateTime updatedAt;
     private LocalDateTime createdAt;
 }

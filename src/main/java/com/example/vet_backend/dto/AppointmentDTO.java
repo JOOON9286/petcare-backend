@@ -14,7 +14,7 @@ public class AppointmentDTO {
     private Long appointmentId;
     private String title;
     private String status;
-    private String statusCall;
+//    private String statusCall;
     private LocalDateTime scheduledTime;
     private LocalDateTime createdAt;
 
@@ -25,4 +25,17 @@ public class AppointmentDTO {
     private String symptoms;
     private String medicalHistory;
     private String additionalInfo;
+
+    private String userName;
+    private String userPhone;
+
+    private String petName;
+    private String petSpecies;
+    private String petBreed;
+    private String petGender;
+    private Float petWeight;
+    private LocalDateTime petBirthDate;
+
+    private String vetName;
+    private String hospitalName;
 }
