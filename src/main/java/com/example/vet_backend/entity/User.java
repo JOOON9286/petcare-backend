@@ -2,6 +2,10 @@ package com.example.vet_backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -32,4 +36,10 @@ public class User {
 
     @Column(nullable = false)
     private String role = "ROLE_USER";
+
+    @CreatedDate
+    private LocalDateTime createdAt;    //생성일
+    @LastModifiedDate
+    private LocalDateTime updatedAt;    //업뎃일
+
 }
