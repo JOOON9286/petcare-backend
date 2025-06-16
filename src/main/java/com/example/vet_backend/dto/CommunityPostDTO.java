@@ -1,9 +1,9 @@
 package com.example.vet_backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.time.LocalDateTime;
-
 
 @Getter
 @Setter
@@ -16,4 +16,7 @@ public class CommunityPostDTO {
     private String content;
     private LocalDateTime createdAt;
     private Long userId;
+    private String userName;
+    private int likes;
+
 }
