@@ -35,6 +35,7 @@ public class PetService {
                 .createdAt(LocalDateTime.now())
                 .owner(user)
                 .isDeleted(false)  // Soft delete 필드 초기값 false
+                .imageUrl(dto.getImageUrl())
                 .build();
 
         Pet saved = petRepository.save(pet);
@@ -99,6 +100,7 @@ public class PetService {
                 .medicalHistory(pet.getMedicalHistory())
                 .neutered(pet.isNeutered())
                 .userId(pet.getOwner().getUserId())
+                .imageUrl(pet.getImageUrl())
                 .build();
     }
 }
