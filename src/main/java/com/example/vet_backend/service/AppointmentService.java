@@ -110,11 +110,12 @@ public class AppointmentService {
             throw new IllegalStateException("완료되거나 취소된 예약은 수정할 수 없습니다.");
         }
 
-        appointment.setTitle(dto.getTitle());
-        appointment.setScheduledTime(dto.getScheduledTime());
-        appointment.setSymptoms(dto.getSymptoms());
-        appointment.setMedicalHistory(dto.getMedicalHistory());
-        appointment.setAdditionalInfo(dto.getAdditionalInfo());
+        //상태 조건 확인 후 부분 수정
+        if (dto.getTitle() != null) appointment.setTitle(dto.getTitle());
+        if (dto.getScheduledTime() != null) appointment.setScheduledTime(dto.getScheduledTime());
+        if (dto.getSymptoms() != null) appointment.setSymptoms(dto.getSymptoms());
+        if (dto.getMedicalHistory() != null) appointment.setMedicalHistory(dto.getMedicalHistory());
+        if (dto.getAdditionalInfo() != null) appointment.setAdditionalInfo(dto.getAdditionalInfo());
 
         Appointment saved = appointmentRepository.save(appointment);
         return convertToDTO(saved);
