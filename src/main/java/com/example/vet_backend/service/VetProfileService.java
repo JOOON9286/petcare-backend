@@ -62,5 +62,57 @@ public class VetProfileService {
                 .toList();
     }
 
+    public VetProfileDTO updateVetProfile(String email, VetProfileDTO dto) {
+        VetProfile vet = vetProfileRepository.findByUserEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("수의사 프로필을 찾을 수 없습니다."));
+
+        // 프로필 정보 업데이트
+        if (dto.getSpecialty() != null) {
+            vet.setSpecialty(dto.getSpecialty());
+        }
+        if (dto.getLicenseNumber() != null) {
+            vet.setLicenseNumber(dto.getLicenseNumber());
+        }
+        if (dto.getProfilePhoto() != null) {
+            vet.setProfilePhoto(dto.getProfilePhoto());
+        }
+        if (dto.getIntroduction() != null) {
+            vet.setIntroduction(dto.getIntroduction());
+        }
+        if (dto.getAvailableDays() != null) {
+            vet.setAvailableDays(dto.getAvailableDays());
+        }
+        if (dto.getAvailableTime() != null) {
+            vet.setAvailableTime(dto.getAvailableTime());
+        }
+        if (dto.getAvailableTime() != null) {
+            vet.setAvailableTime(dto.getAvailableTime());
+        }
+        if (dto.getIsOnline() != null){
+            vet.setIsOnline(dto.getIsOnline());
+        }
+
+
+        VetProfile updated = vetProfileRepository.save(vet);
+
+        return VetProfileDTO.builder()
+                .vetId(updated.getVetId())
+                .specialty(updated.getSpecialty())
+                .licenseNumber(updated.getLicenseNumber())
+                .profilePhoto(updated.getProfilePhoto())
+                .ratingAvg(updated.getRatingAvg())
+                .reviewCount(updated.getReviewCount())
+                .isOnline(updated.getIsOnline())
+                .userId(updated.getUser().getUserId())
+                .userName(updated.getUser().getName())
+                .hospitalId(updated.getHospital() != null ? updated.getHospital().getHospitalId() : null)
+                .hospitalName(updated.getHospital() != null ? updated.getHospital().getName() : null)
+                .introduction(updated.getIntroduction())
+                .availableDays(updated.getAvailableDays())
+                .availableTime(updated.getAvailableTime())
+                .build();
+    }
+
+
 
 }
