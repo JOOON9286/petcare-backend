@@ -25,6 +25,9 @@ public class Pet {
     private Float weight;
     private LocalDateTime birthDate;
 
+    @Column(columnDefinition = "TEXT")
+    private String imageUrl;
+
     @Column(length = 255)
     private String medicalHistory;
 

@@ -18,7 +18,10 @@ public class VetProfile {
 
     private String specialty;
     private String licenseNumber;
+
+    @Column(columnDefinition = "TEXT")
     private String profilePhoto;
+
     private Integer ratingAvg;
     private Integer reviewCount;
     private Boolean isOnline;

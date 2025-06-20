@@ -23,6 +23,7 @@ public class PetDTO {
     private LocalDateTime createdAt;
     private Long userId;
     private boolean neutered;
+    private String imageUrl;
     //반려동물 DTO
 
 }
