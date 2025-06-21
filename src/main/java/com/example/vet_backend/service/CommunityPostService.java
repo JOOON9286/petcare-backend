@@ -58,4 +58,14 @@ public class CommunityPostService {
 
         postRepository.save(post);
     }
+    public void deletePost(Long postId) {
+        postRepository.deleteById(postId);
+    }
+    public void updatePost(Long postId, String newTitle, String newContent) {
+        CommunityPost post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다."));
+        post.setTitle(newTitle);
+        post.setContent(newContent);
+        postRepository.save(post);
+    }
 }
