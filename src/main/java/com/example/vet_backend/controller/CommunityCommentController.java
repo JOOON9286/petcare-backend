@@ -36,5 +36,15 @@ public class CommunityCommentController {
         commentService.voteComment(commentId, isUpvote, cancel);
         return ResponseEntity.ok("처리 완료");
     }
-
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable Long commentId) {
+        commentService.deleteComment(commentId);
+        return ResponseEntity.ok().build();
+    }
+    @PutMapping("/{commentId}")
+    public ResponseEntity<?> updateComment(@PathVariable Long commentId, @RequestBody Map<String, String> updates) {
+        String newContent = updates.get("content");
+        commentService.updateComment(commentId, newContent);
+        return ResponseEntity.ok("댓글 수정 완료");
+    }
 }

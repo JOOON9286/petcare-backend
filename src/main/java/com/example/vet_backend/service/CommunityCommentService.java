@@ -68,5 +68,13 @@ public class CommunityCommentService {
         commentRepository.save(comment);
     }
 
-
+    public void deleteComment(Long commentId) {
+        commentRepository.deleteById(commentId);
+    }
+    public void updateComment(Long commentId, String newContent) {
+        CommunityComment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 없습니다."));
+        comment.setContent(newContent);
+        commentRepository.save(comment);
+    }
 }
