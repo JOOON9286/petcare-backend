@@ -31,6 +31,9 @@ public class User {
 
     private String phone;
 
+    @Column(columnDefinition = "TEXT")
+    private String profileUserPhoto;
+
     @Column(length = 500)
     private String refreshToken;
 
