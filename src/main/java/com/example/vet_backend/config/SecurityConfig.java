@@ -33,14 +33,20 @@ public class SecurityConfig {
                                 "/api/auth/login",
                                 "/api/users/register",
                                 "/api/users/login",
-                                "/api/community/**"
+                                "/api/community/**",
+                                "/api/reviews/**",
+                                "/api/users/**",
+                                "/api/users",
+                                "/api/users/doctors"
                         ).permitAll()
 
                         // 사용자 전용 경로
                         .requestMatchers(
                                 "/api/reservation/**",
                                 "/api/mypage/**",
-                                "/api/pet/**"
+                                "/api/pet/**",
+                                "/api/vets",
+                                "/api/appointments/find"
                         ).hasRole("USER")
 
                         // 의사 전용 경로
@@ -54,7 +60,7 @@ public class SecurityConfig {
                         // 관리자 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // 나머지는 인증 필요
+                        // 그 외는 인증만 필요
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);

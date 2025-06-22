@@ -18,7 +18,7 @@ public class Appointment {
 
     private String title;
     private String status;
-    private String statusCall;
+//    private String statusCall;
 
     private LocalDateTime scheduledTime;
     private LocalDateTime createdAt;

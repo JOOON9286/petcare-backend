@@ -4,7 +4,6 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,4 +14,8 @@ public class CommunityCommentDTO {
     private String content;
     private LocalDateTime createdAt;
     private Long postId;
+    private String userName;
+    private Long userId;
+    private int upvotes;
+    private int downvotes;
 }

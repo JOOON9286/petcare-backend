@@ -16,26 +16,30 @@ public class Pet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long petId; //반려동물 ID
+    private Long petId;
 
-    private String name; //반려동물 이름
+    private String name;
+    private String species;
+    private String breed;
+    private String gender;
+    private Float weight;
+    private LocalDateTime birthDate;
 
-    private String species; //반려동물 이름
-
-    private String breed; // 종(개,고양이)
-
-    private String gender; //성별
-
-    private Float weight; //몸무게
-
-    private LocalDateTime birthDate; //생년월일
+    @Column(columnDefinition = "TEXT")
+    private String imageUrl;
 
     @Column(length = 255)
-    private String medicalHistory; //병력 정보
+    private String medicalHistory;
 
-    private LocalDateTime createdAt; //등록일
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private boolean neutered = false;
+
+    @Column(nullable = false)
+    private boolean isDeleted = false; // 펫이 삭제되어도 진료일정 삭제 여부를 결정하기 위한 Soft Delete
 
     @ManyToOne
-    @JoinColumn(name = "user_id")   //사용자 ID
+    @JoinColumn(name = "user_id")
     private User owner;
 }
