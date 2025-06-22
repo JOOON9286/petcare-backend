@@ -68,6 +68,7 @@ public class UserService {
         }
 
         user.setPhone(dto.getPhone());
+        user.setProfileUserPhoto(dto.getProfileUserPhoto());
 
         User updatedUser = userRepository.save(user);
         return entityToDTO(updatedUser);
@@ -80,6 +81,7 @@ public class UserService {
                 .name(user.getName())  // UserDTO에 name x 이름수정 못함
                 .phone(user.getPhone())
                 .role(user.getRole())
+                .profileUserPhoto(user.getProfileUserPhoto())   //유저프로필사진
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();
