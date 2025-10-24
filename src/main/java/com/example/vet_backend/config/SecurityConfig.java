@@ -37,7 +37,8 @@ public class SecurityConfig {
                                 "/api/reviews/**",
                                 "/api/users/**",
                                 "/api/users",
-                                "/api/users/doctors"
+                                "/api/users/doctors",
+                                "/api/consult/**"
                         ).permitAll()
 
                         // 사용자 전용 경로
