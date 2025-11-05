@@ -88,11 +88,20 @@ public class AppointmentService {
         return convertToDTO(appointment);
     }
 
-    // 예약 상태 업데이트 (기존 로직 유지)
+
     public void updateStatus(Long appointmentId, String newStatus) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
-        appointment.setStatus(newStatus);
+
+        String normalizedStatus = newStatus;
+        // newStatus가 null이 아니고, 따옴표로 감싸져 있다면 (예: "\"접수됨\"")
+        if (newStatus != null && newStatus.startsWith("\"") && newStatus.endsWith("\"")) {
+            // 앞뒤 따옴표 1개씩만 제거 (예: "접수됨")
+            normalizedStatus = newStatus.substring(1, newStatus.length() - 1);
+        }
+
+        // 따옴표가 제거된 'normalizedStatus'를 저장
+        appointment.setStatus(normalizedStatus);
         appointmentRepository.save(appointment);
     }
 
@@ -133,7 +142,7 @@ public class AppointmentService {
         appointmentRepository.delete(appointment);
     }
 
-    // 📌 [핵심] 사용자 ID와 수의사 User ID를 매개변수로 받아 실제 Vet ID로 변환 후 조회
+    // 📌 [핵심] 사용자 ID와 수의사 User ID를 매개변수로 받아 실제 Vet ID로 변환 후 조회 (수정됨)
     public Long findAppointmentIdByUserAndVet(Long userId, Long vetUserId) {
         System.out.println("findAppointmentIdByUserAndVet 호출됨 - userId: " + userId + ", vetUserId: " + vetUserId);
 
@@ -152,7 +161,7 @@ public class AppointmentService {
         List<Appointment> appointments = appointmentRepository.findNearestAppointments(
                 userId,
                 actualVetId, // <-- 변환된 실제 Vet ID 사용
-                "\"접수됨\"", // DB 상태 문자열과 일치 확인
+                "접수됨", // ◀◀◀ [수정] "\"접수됨\"" -> "접수됨"
                 LocalDateTime.now()
         );
 
