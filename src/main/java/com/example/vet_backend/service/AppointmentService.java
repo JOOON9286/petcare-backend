@@ -11,6 +11,7 @@ import com.example.vet_backend.repository.UserRepository;
 import com.example.vet_backend.repository.VetProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
@@ -25,7 +27,7 @@ public class AppointmentService {
     private final VetProfileRepository vetProfileRepository;
     private final PetRepository petRepository;
 
-    // 예약 생성 (기존 로직 유지)
+    // 1. 예약 생성
     public AppointmentDTO createAppointment(AppointmentDTO dto) {
         User user = userRepository.findById(dto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
@@ -50,7 +52,8 @@ public class AppointmentService {
         return convertToDTO(saved);
     }
 
-    // 사용자 예약 목록 조회 (기존 로직 유지)
+    // 2. 사용자 예약 목록 조회
+    @Transactional(readOnly = true)
     public List<AppointmentDTO> getAppointmentsByUser(Long userId) {
         return appointmentRepository.findByUser_UserId(userId)
                 .stream()
@@ -58,27 +61,31 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
-    // 수의사의 유저ID로 예약 목록 조회 (기존 로직 유지)
+    // 3. 수의사의 유저ID로 예약 목록 조회
+    @Transactional(readOnly = true)
     public List<AppointmentDTO> getAppointmentsByVetUserId(Long userId) {
         VetProfile vet = vetProfileRepository.findByUserUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 userId로 수의사를 찾을 수 없습니다."));
         return getAppointmentsByVet(vet.getVetId());
     }
 
-    // 수의사 ID로 예약 목록 조회 (기존 로직 유지)
+    // 4. 수의사 ID로 예약 목록 조회
+    @Transactional(readOnly = true)
     public List<AppointmentDTO> getAppointmentsByVet(Long vetId) {
         List<Appointment> list = appointmentRepository.findByVet_VetId(vetId);
         return list.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    // 예약 상세 조회 (기존 로직 유지)
-    public AppointmentDTO getAppointmentDetail(Long id) {
-        Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
+    // 5. 예약 상세 조회 (단건 조회 - 화상 진료용) 📌 [이게 필요했습니다!]
+    @Transactional(readOnly = true)
+    public AppointmentDTO getAppointmentDetail(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다. ID: " + appointmentId));
         return convertToDTO(appointment);
     }
 
-    // 사용자 본인의 예약 상세 조회 (기존 로직 유지)
+    // 6. 사용자 본인의 예약 상세 조회
+    @Transactional(readOnly = true)
     public AppointmentDTO getAppointmentDetailByUser(Long appointmentId, Long userId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
@@ -88,24 +95,25 @@ public class AppointmentService {
         return convertToDTO(appointment);
     }
 
-
+    // 7. 예약 상태 변경 (따옴표 제거 로직 포함)
     public void updateStatus(Long appointmentId, String newStatus) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
 
         String normalizedStatus = newStatus;
-        // newStatus가 null이 아니고, 따옴표로 감싸져 있다면 (예: "\"접수됨\"")
-        if (newStatus != null && newStatus.startsWith("\"") && newStatus.endsWith("\"")) {
-            // 앞뒤 따옴표 1개씩만 제거 (예: "접수됨")
-            normalizedStatus = newStatus.substring(1, newStatus.length() - 1);
+        if (newStatus != null) {
+            if (newStatus.startsWith("\"") && newStatus.endsWith("\"")) {
+                normalizedStatus = newStatus.substring(1, newStatus.length() - 1);
+            } else if (newStatus.startsWith("'") && newStatus.endsWith("'")) {
+                normalizedStatus = newStatus.substring(1, newStatus.length() - 1);
+            }
         }
 
-        // 따옴표가 제거된 'normalizedStatus'를 저장
         appointment.setStatus(normalizedStatus);
         appointmentRepository.save(appointment);
     }
 
-    // 사용자 본인의 예약 수정 (기존 로직 유지)
+    // 8. 사용자 본인의 예약 수정
     public AppointmentDTO updateAppointmentByUser(Long appointmentId, Long userId, AppointmentDTO dto) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
@@ -127,7 +135,7 @@ public class AppointmentService {
         return convertToDTO(saved);
     }
 
-    // 사용자 본인의 예약 삭제 (기존 로직 유지)
+    // 9. 사용자 본인의 예약 삭제
     public void deleteAppointmentByUser(Long appointmentId, Long userId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
@@ -142,57 +150,46 @@ public class AppointmentService {
         appointmentRepository.delete(appointment);
     }
 
-    // 📌 [핵심] 사용자 ID와 수의사 User ID를 매개변수로 받아 실제 Vet ID로 변환 후 조회 (수정됨)
+    // 10. 화상 진료용 예약 ID 찾기 (참고용 유지)
     public Long findAppointmentIdByUserAndVet(Long userId, Long vetUserId) {
-        System.out.println("findAppointmentIdByUserAndVet 호출됨 - userId: " + userId + ", vetUserId: " + vetUserId);
-
-        // 1. 수의사 User ID를 사용하여 해당 수의사의 VetProfile을 찾습니다.
         VetProfile vetProfile = vetProfileRepository.findByUserUserId(vetUserId)
-                .orElseThrow(() -> {
-                    System.err.println("❌ 수의사 User ID(" + vetUserId + ")에 연결된 VetProfile(실제 vetId)을 찾을 수 없습니다.");
-                    return new IllegalStateException("수의사 프로필(VetProfile)을 찾을 수 없습니다.");
-                });
+                .orElseThrow(() -> new IllegalStateException("수의사 프로필을 찾을 수 없습니다."));
 
-        // 2. 실제 Appointment 테이블이 사용하는 Vet ID를 추출합니다.
         Long actualVetId = vetProfile.getVetId();
-        System.out.println("변환된 실제 vetId (DB 예약 테이블 조회용): " + actualVetId);
 
-        // 3. 추출된 actualVetId를 사용하여 예약 조회
         List<Appointment> appointments = appointmentRepository.findNearestAppointments(
                 userId,
-                actualVetId, // <-- 변환된 실제 Vet ID 사용
-                "접수됨", // ◀◀◀ [수정] "\"접수됨\"" -> "접수됨"
+                actualVetId,
+                "접수됨",
                 LocalDateTime.now()
         );
 
-        if (appointments.isEmpty()) {
-            System.out.println("조건에 맞는 예약 없음.");
-            return null; // 찾지 못하면 null 반환 (컨트롤러가 404 처리)
-        } else {
-            Long appointmentId = appointments.get(0).getAppointmentId();
-            System.out.println("찾아낸 예약 ID: " + appointmentId);
-            return appointmentId;
-        }
+        if (appointments.isEmpty()) return null;
+        return appointments.get(0).getAppointmentId();
     }
 
-    // 엔티티 -> DTO 변환 메서드 (기존 로직 유지)
+    // 🔄 Entity -> DTO 변환
     private AppointmentDTO convertToDTO(Appointment a) {
         if (a == null) return null;
+
         return AppointmentDTO.builder()
                 .appointmentId(a.getAppointmentId())
                 .title(a.getTitle())
                 .status(a.getStatus())
                 .scheduledTime(a.getScheduledTime())
                 .createdAt(a.getCreatedAt())
-                // User 정보 (Null 체크 포함)
+
+                // User 정보
                 .userId(a.getUser() != null ? a.getUser().getUserId() : null)
                 .userName(a.getUser() != null ? a.getUser().getName() : null)
                 .userPhone(a.getUser() != null ? a.getUser().getPhone() : null)
-                // Vet 정보 (Null 체크 포함)
+
+                // Vet 정보
                 .vetId(a.getVet() != null ? a.getVet().getVetId() : null)
                 .vetName(a.getVet() != null && a.getVet().getUser() != null ? a.getVet().getUser().getName() : null)
                 .hospitalName(a.getVet() != null && a.getVet().getHospital() != null ? a.getVet().getHospital().getName() : null)
-                // Pet 정보 (Null 체크 포함)
+
+                // Pet 정보
                 .petId(a.getPet() != null ? a.getPet().getPetId() : null)
                 .petName(a.getPet() != null ? a.getPet().getName() : null)
                 .petSpecies(a.getPet() != null ? a.getPet().getSpecies() : null)
@@ -200,7 +197,8 @@ public class AppointmentService {
                 .petGender(a.getPet() != null ? a.getPet().getGender() : null)
                 .petWeight(a.getPet() != null ? a.getPet().getWeight() : null)
                 .petBirthDate(a.getPet() != null ? a.getPet().getBirthDate() : null)
-                // 기타 정보
+
+                // 상세 정보
                 .symptoms(a.getSymptoms())
                 .medicalHistory(a.getMedicalHistory())
                 .additionalInfo(a.getAdditionalInfo())
