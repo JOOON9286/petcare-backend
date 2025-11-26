@@ -3,7 +3,6 @@ package com.example.vet_backend.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,21 +16,18 @@ public class Appointment {
     private Long appointmentId;
 
     private String title;
-    private String status;
-//    private String statusCall;
+    private String status; // 예약확정, 진료완료 등
 
     private LocalDateTime scheduledTime;
     private LocalDateTime createdAt;
 
-    // 추가 정보 필드
+    // 진료 전 문진표 내용
     @Column(columnDefinition = "TEXT")
-    private String symptoms; // 증상
-
+    private String symptoms;
     @Column(columnDefinition = "TEXT")
-    private String medicalHistory; // 과거 병력
-
+    private String medicalHistory;
     @Column(columnDefinition = "TEXT")
-    private String additionalInfo; // 알레르기, 복용 중인 약물 등
+    private String additionalInfo;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -44,5 +40,8 @@ public class Appointment {
     @ManyToOne
     @JoinColumn(name = "pet_id")
     private Pet pet;
-}
 
+    // 📌 [수정] 예약 정보를 조회할 때 처방전 발행 여부를 알기 위해 연결 (DB 컬럼 생성 안됨)
+    @OneToOne(mappedBy = "appointment", fetch = FetchType.LAZY)
+    private Prescription prescription;
+}
