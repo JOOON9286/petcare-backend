@@ -1,4 +1,5 @@
 package com.example.vet_backend.config;
+
 import com.example.vet_backend.filter.JwtAuthenticationFilter;
 import com.example.vet_backend.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -27,41 +28,40 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 공개 경로
+                        // 1. 공개 경로 (로그인 없이 접근 가능)
                         .requestMatchers(
-                                "/api/auth/register",
-                                "/api/auth/login",
+                                "/api/auth/**",
                                 "/api/users/register",
                                 "/api/users/login",
+                                "/api/users/doctors",
                                 "/api/community/**",
                                 "/api/reviews/**",
-                                "/api/users/**",
-                                "/api/users",
-                                "/api/users/doctors",
-                                "/api/consult/**"
+                                "/api/consult/**",
+                                "/api/prescription/**",
+                                "/api/appointments/**"  // 👈 [핵심 수정] 여기에 's' 붙은 복수형 추가!
                         ).permitAll()
 
-                        // 사용자 전용 경로
+                        // 2. 사용자 전용 경로
                         .requestMatchers(
                                 "/api/reservation/**",
                                 "/api/mypage/**",
                                 "/api/pet/**",
                                 "/api/vets",
-                                "/api/appointments/find"
+                                "/api/payment/**"
                         ).hasRole("USER")
 
-                        // 의사 전용 경로
+                        // 3. 의사 전용 경로
                         .requestMatchers(
                                 "/api/doctor/**",
-                                "/api/appointment/**",
+                                // "/api/appointment/**", // ❌ 오타였던 부분 삭제 (위쪽 permitAll이나 공통으로 처리)
                                 "/api/doctor/mypage/**",
                                 "/api/vets/me"
                         ).hasRole("DOCTOR")
 
-                        // 관리자 전용
+                        // 4. 관리자 전용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // 그 외는 인증만 필요
+                        // 5. 그 외는 인증만 필요
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
