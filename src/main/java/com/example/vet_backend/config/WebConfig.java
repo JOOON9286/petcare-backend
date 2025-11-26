@@ -9,11 +9,15 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000","http://localhost:3001")// ✅ 정확한 프론트 주소로
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
-                .allowedHeaders("Authorization", "Content-Type")
-                .exposedHeaders("Custom-Header")
+
+        registry.addMapping("/api/**")
+                .allowedOrigins(
+                        "http://localhost:3000",
+                        // ◀◀◀ [수정!] Cloudflare 프론트 주소
+                        "https://entered-hanging-everything-holiday.trycloudflare.com"
+                )
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .allowedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
     }
