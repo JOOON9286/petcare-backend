@@ -38,7 +38,7 @@ public class SecurityConfig {
                                 "/api/reviews/**",
                                 "/api/consult/**",
                                 "/api/prescription/**",
-                                "/api/appointments/**"  // 👈 [핵심 수정] 여기에 's' 붙은 복수형 추가!
+                                "/api/appointments/**"
                         ).permitAll()
 
                         // 2. 사용자 전용 경로
@@ -53,7 +53,6 @@ public class SecurityConfig {
                         // 3. 의사 전용 경로
                         .requestMatchers(
                                 "/api/doctor/**",
-                                // "/api/appointment/**", // ❌ 오타였던 부분 삭제 (위쪽 permitAll이나 공통으로 처리)
                                 "/api/doctor/mypage/**",
                                 "/api/vets/me"
                         ).hasRole("DOCTOR")
