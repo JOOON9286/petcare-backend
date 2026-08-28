@@ -5,7 +5,7 @@ import com.example.vet_backend.dto.PaymentDTO;
 import com.example.vet_backend.entity.Payment;
 import com.example.vet_backend.entity.Prescription;
 import com.example.vet_backend.repository.PaymentRepository;
-import com.example.vet_backend.repository.PrescriptionRepository; // 📌 추가됨
+import com.example.vet_backend.repository.PrescriptionRepository; // 추가됨
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class PaymentService {
 
     private final TossPaymentConfig tossPaymentConfig;
     private final PaymentRepository paymentRepository;
-    private final PrescriptionRepository prescriptionRepository; // 📌 처방전 조회용 리포지토리 주입
+    private final PrescriptionRepository prescriptionRepository; // 처방전 조회용 리포지토리 주입
 
     @Transactional
     public String paymentConfirm(PaymentDTO paymentDTO) throws Exception {
@@ -56,7 +56,7 @@ public class PaymentService {
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             JsonNode body = responseEntity.getBody();
 
-            // 📌 [핵심 로직] OrderId 파싱 -> 처방전 찾기 -> 상태 'PAID'로 변경
+            // [핵심 로직] OrderId 파싱 -> 처방전 찾기 -> 상태 'PAID'로 변경
             // 프론트엔드에서 보낸 orderId 형식: "ORDER-{예약ID}-{타임스탬프}"
             Prescription prescription = null;
             try {
@@ -72,17 +72,17 @@ public class PaymentService {
                             .orElse(null);
 
                     if (prescription != null) {
-                        // 1️⃣ 처방전 상태 변경 (결제 완료)
+                        // 1. 처방전 상태 변경 (결제 완료)
                         prescription.setPaymentStatus("PAID");
 
-                        // 2️⃣ 변경 사항 DB 저장 (필수!)
+                        // 2. 변경 사항 DB 저장 (필수!)
                         prescriptionRepository.save(prescription);
 
-                        System.out.println("✅ 처방전(ID:" + prescription.getPrescriptionId() + ") 상태가 PAID로 변경되었습니다.");
+                        System.out.println("처방전(ID:" + prescription.getPrescriptionId() + ") 상태가 PAID로 변경되었습니다.");
                     }
                 }
             } catch (Exception e) {
-                System.err.println("⚠️ 처방전 상태 업데이트 중 오류 발생 (결제는 진행됨): " + e.getMessage());
+                System.err.println("처방전 상태 업데이트 중 오류 발생 (결제는 진행됨): " + e.getMessage());
             }
 
             // 7. 결제 정보(Payment) 저장
@@ -94,7 +94,7 @@ public class PaymentService {
                     .status(body.get("status").asText())       // 결제 상태 (DONE)
                     .orderName(body.get("orderName").asText()) // 주문명
                     .approvedAt(LocalDateTime.now())           // 승인 시간
-                    .prescription(prescription)                // 3️⃣ 결제 정보와 처방전 연결 (Foreign Key)
+                    .prescription(prescription)                // 3. 결제 정보와 처방전 연결 (Foreign Key)
                     .build();
 
             paymentRepository.save(payment); // 결제 정보 저장

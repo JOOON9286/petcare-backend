@@ -20,7 +20,7 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
 
-    // ✅ 생성자에 두 개 다 주입
+    // 생성자에 두 개 다 주입
     public UserController(UserService userService, UserRepository userRepository) {
         this.userService = userService;
         this.userRepository = userRepository;

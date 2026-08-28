@@ -76,7 +76,7 @@ public class AppointmentService {
         return list.stream().map(this::convertToDTO).collect(Collectors.toList());
     }
 
-    // 5. 예약 상세 조회 (단건 조회 - 화상 진료용) 📌 [이게 필요했습니다!]
+    // 5. 예약 상세 조회 (단건 조회 - 화상 진료용) [이게 필요했습니다!]
     @Transactional(readOnly = true)
     public AppointmentDTO getAppointmentDetail(Long appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
@@ -168,7 +168,7 @@ public class AppointmentService {
         return appointments.get(0).getAppointmentId();
     }
 
-    // 🔄 Entity -> DTO 변환
+    // Entity -> DTO 변환
     private AppointmentDTO convertToDTO(Appointment a) {
         if (a == null) return null;
 

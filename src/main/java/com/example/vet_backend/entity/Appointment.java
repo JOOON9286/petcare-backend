@@ -41,7 +41,7 @@ public class Appointment {
     @JoinColumn(name = "pet_id")
     private Pet pet;
 
-    // 📌 [수정] 예약 정보를 조회할 때 처방전 발행 여부를 알기 위해 연결 (DB 컬럼 생성 안됨)
+    // [수정] 예약 정보를 조회할 때 처방전 발행 여부를 알기 위해 연결 (DB 컬럼 생성 안됨)
     @OneToOne(mappedBy = "appointment", fetch = FetchType.LAZY)
     private Prescription prescription;
 }

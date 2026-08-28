@@ -1,4 +1,4 @@
-package com.example.vet_backend.controller; // 📌 패키지 경로 변경
+package com.example.vet_backend.controller; // 패키지 경로 변경
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +14,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
-public class SignalingController extends TextWebSocketHandler { // 📌 클래스 이름 변경
+public class SignalingController extends TextWebSocketHandler { // 클래스 이름 변경
 
-    // 📌 방 관리 맵: reservationId(방 ID) -> Map of WebSocketSession
+    // 방 관리 맵: reservationId(방 ID) -> Map of WebSocketSession
     private final Map<String, Map<String, WebSocketSession>> rooms = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper; // JSON 파싱을 위한 ObjectMapper
 
-    // 📌 세션 ID와 방 ID(Reservation ID)를 매핑하는 맵
+    // 세션 ID와 방 ID(Reservation ID)를 매핑하는 맵
     private final Map<String, String> sessionToRoomId = new ConcurrentHashMap<>();
 
     @Override
@@ -97,6 +97,6 @@ public class SignalingController extends TextWebSocketHandler { // 📌 클래�
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        System.err.println("⚠️ WebSocket 전송 오류: " + exception.getMessage());
+        System.err.println("WebSocket 전송 오류: " + exception.getMessage());
     }
 }

@@ -44,14 +44,14 @@ public class PrescriptionService {
                 .paymentStatus("PENDING") // 초기 상태: 결제 대기
                 .createdAt(LocalDateTime.now())
 
-                // 📌 [수정됨] Pet 이름 가져오기 (.getPetName() -> .getName())
+                // [수정됨] Pet 이름 가져오기 (.getPetName() -> .getName())
                 .petName(appointment.getPet().getName())
 
                 .petSpecies(appointment.getPet().getSpecies())
                 .petWeight(String.valueOf(appointment.getPet().getWeight()))
                 .doctorName(appointment.getVet().getUser().getName())
 
-                // 📌 [수정됨] 병원 이름 가져오기
+                // [수정됨] 병원 이름 가져오기
                 .clinicName(appointment.getVet().getHospital().getName())
 
                 .appointment(appointment) // 연관관계 설정
